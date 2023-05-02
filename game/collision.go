@@ -4,13 +4,17 @@ import (
 	"codegame.com/codegame/tank"
 )
 
-func OffMap(oX, oY, oWidth, oHeight, worldX, worldY float64) bool {
-	oRX := oX + oWidth  // l2 AX2
-	oBY := oY - oHeight // l2 AY2
+func OffMap(pos tank.TankPosition, worldX, worldY float64) bool {
 
-	if oX < 0 || oRX > worldX || oY < 0 || oBY > worldY {
+	// x axis
+	if pos.X < 0 || pos.X+float64(pos.Width) > worldX {
 		return true
 	}
+
+	if pos.Y < 0 || pos.Y+float64(pos.Height) > worldY {
+		return true
+	}
+
 	return false
 }
 
@@ -33,6 +37,7 @@ func Collision(pos, enemy tank.TankPosition) bool {
 }
 
 func bulletOverlap(A, B tank.TankPosition) bool {
+
 	xOverlap := valueInRange(A.BulletX, B.X, B.X+float64(B.Width)) ||
 		valueInRange(B.X, A.BulletX, A.BulletX+float64(A.BulletSize))
 

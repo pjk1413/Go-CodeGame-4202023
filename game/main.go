@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
@@ -10,8 +9,6 @@ import (
 	"codegame.com/codegame/tank"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-// https://blog.carlmjohnson.net/post/2021/how-to-use-go-embed/ - possible use for getting files
 
 var (
 	red    = color.RGBA{0xff, 0, 0, 0xff}
@@ -39,7 +36,6 @@ type Game struct {
 	world   World // set world here
 	players []player.PlayerInterface
 	tanks   []tank.Tank
-	ps      map[string]map[string]P
 	x       float64
 	y       float64
 }
@@ -49,13 +45,12 @@ func (g *Game) Update() error {
 	for i := 0; i < len(g.tanks); i++ {
 		var hit, move, score bool = false, true, false
 
+		// get tank position
 		pos := g.tanks[i].GetPosition()
-		// fmt.Println(g.tanks[i].Name, g.tanks[i].GetPosition().X)
 
 		// Detect for collisions with edges
-		if OffMap(pos.X, pos.Y, float64(pos.Width), float64(pos.Height), float64(width-200), float64(height)) {
+		if OffMap(pos, float64(width-200), float64(height)) {
 			hit, move = true, false
-			fmt.Println("wall collision")
 		}
 
 		// check for bullet collisions and tank collisions
@@ -66,7 +61,6 @@ func (g *Game) Update() error {
 				// Check for collision with another tank
 				if Collision(pos, enemy) {
 					hit, move = true, false
-					// fmt.Println("tank collision", pos.X, enemy.X)
 				}
 
 				// check for collision with bullet
@@ -82,7 +76,14 @@ func (g *Game) Update() error {
 		}
 
 		if move {
-			g.players[i].Update(&g.tanks[i])
+			tp := []tank.TankPosition{}
+			// get all the enemy tanks positions
+			for t := 0; t < len(g.tanks); t++ {
+				if t != i {
+					tp = append(tp, g.tanks[t].GetPosition())
+				}
+			}
+			g.players[i].Update(&g.tanks[i], tp)
 		}
 
 		if hit {
@@ -102,8 +103,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// draw the world onto the screen
 	g.world.drawScreen(screen, g.tanks)
-	// text.Draw(screen, fmt.Sprintf("POSX: %d", g.x), mplusNormalFont, int(g.x), 25, color.Black)
-	// text.Draw(screen, tank.Name, mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-30)), color.Black)
+
 	// draw the tanks
 	for i := 0; i < len(g.players); i++ {
 		g.tanks[i].Draw(screen)
@@ -120,15 +120,21 @@ func main() {
 	g.world = World{}
 	g.world.init()
 
-	// assign tank and players here
-	// g.tanks = map[string]map[string]P
+	// init tanks and players
+	g.players = []player.PlayerInterface{
+		&players.TemplateTanks{},
+		&players.Destroyer{},
+		&players.Killer{},
+		&players.BigBoy{},
+	}
 
-	g.tanks = []tank.Tank{tank.Tank{Name: "Sample Tank", Color: red}, tank.Tank{Name: "Destroyer", Color: blue}} // players will need to init better
-	g.players = []player.PlayerInterface{&players.TemplateTanks{}, &players.Destroyer{}}
+	for _, player := range g.players {
+		g.tanks = append(g.tanks, *player.Create())
+	}
 
-	// Need to initialize these better
-	g.tanks[0].Position(100, 100)
-	g.tanks[1].Position(500, 500)
+	for i, position := range StartingPositions(4) {
+		g.tanks[i].InitTank(position.x, position.y, position.facing)
+	}
 
 	// Set window size and title
 	ebiten.SetWindowSize(width, height)

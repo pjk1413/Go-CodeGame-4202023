@@ -17,5 +17,6 @@ var (
 type Player struct{}
 
 type PlayerInterface interface {
-	Update(t *tank.Tank)
+	Update(*tank.Tank, []tank.TankPosition)
+	Create() *tank.Tank
 }

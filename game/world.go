@@ -16,14 +16,9 @@ import (
 
 var (
 	mplusNormalFont font.Face
+	strikeface      font.Face
 	tilesImage      *ebiten.Image
 )
-
-// type WorldInterface interface {
-// 	startingPositions() [][]int
-// 	drawScreen(screen *ebiten.Image)
-// 	init()
-// }
 
 type World struct {
 	tileSize   int
@@ -41,8 +36,9 @@ type Block struct {
 }
 
 type Position struct {
-	x float64
-	y float64
+	x      float64
+	y      float64
+	facing float64
 }
 
 func (w *World) toMap() [40][30]map[string]float64 {
@@ -77,6 +73,7 @@ func (w *World) init() {
 		DPI:     dpi,
 		Hinting: font.HintingVertical,
 	})
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,17 +113,30 @@ func (w *World) init() {
 	// w.tilemap = tilemap
 }
 
-func (w *World) startingPositions() [][]int {
+func StartingPositions(total int) []Position {
 	// will return coordinates for the starting positions
+	pos := []Position{
+		Position{x: 50, y: 50, facing: 1},
+		Position{x: 750, y: 50, facing: 3},
+		Position{x: 50, y: 550, facing: 3},
+		Position{x: 750, y: 550, facing: 3},
+	}
 
-	return [][]int{}
+	return pos[:total]
 }
 
 func (w *World) scoreboard(screen *ebiten.Image, pos int, tank tank.Tank) {
 
 	// Draw player name
-	vector.DrawFilledRect(screen, 800, float32((600/4)*pos-(600/4-5)), 200, 32, tank.Color, false)
-	text.Draw(screen, tank.Name, mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-30)), color.Black)
+	vector.DrawFilledRect(screen, 800, float32((600/4)*pos-(600/4-5)), 200, 32, tank.GetColor(), false)
+
+	name := tank.Name
+
+	if tank.GetHealth() == 0 {
+		name = "OUT *" + tank.Name
+	}
+
+	text.Draw(screen, name, mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-30)), color.Black)
 
 	// Draw lines to create scoreboard
 	if pos == 1 {
@@ -135,12 +145,12 @@ func (w *World) scoreboard(screen *ebiten.Image, pos int, tank tank.Tank) {
 	vector.DrawFilledRect(screen, 800, float32((600/4)*pos), 200, 5, color.Black, false)
 
 	// Draw Score
-	text.Draw(screen, fmt.Sprintf("Score: %d", pos), mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-60)), color.Black)
+	text.Draw(screen, fmt.Sprintf("Score: %d", tank.GetScore()), mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-60)), color.Black)
 
 	// Draw Health Bar
-	text.Draw(screen, fmt.Sprintf("Health: %d/3", pos), mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-90)), color.Black)
-	vector.DrawFilledRect(screen, 800+10, float32((600/4)*pos-((600/4)-110)), 180, 30, color.RGBA{0, 0xff, 0, 0xff}, false)
-	vector.DrawFilledRect(screen, 800+10, float32((600/4)*pos-((600/4)-110)), 90, 30, color.RGBA{0xff, 0, 0, 0xff}, false)
+	text.Draw(screen, fmt.Sprintf("Health: %d/3", tank.GetHealth()), mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-90)), color.Black)
+	vector.DrawFilledRect(screen, 800+10, float32((600/4)*pos-((600/4)-110)), 180, 30, color.RGBA{0xff, 0, 0, 0xff}, false)
+	vector.DrawFilledRect(screen, 800+10, float32((600/4)*pos-((600/4)-110)), float32(tank.GetHealth())*180/3, 30, color.RGBA{0, 0xff, 0, 0xff}, false)
 
 	// Draw scoreboard border
 	vector.DrawFilledRect(screen, 800, 0, 5, 600, color.Black, false)

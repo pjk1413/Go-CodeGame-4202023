@@ -12,10 +12,12 @@ type TemplateTanks struct {
 }
 
 // Will need the tilemap and the player locations
-func (p *TemplateTanks) Update(t *tank.Tank) {
-	pos := t.GetPosition()
-	t.SetFacing(.8)
-	if pos.Facing < .9 && pos.Facing > .7 {
+func (tt *TemplateTanks) Update(t *tank.Tank, pos []tank.TankPosition) {
+	p := t.GetPosition()
+
+	// circle := 2 * math.Pi
+
+	if p.Facing > 89 && p.Facing < 91 {
 		t.Fire()
 	} else {
 		t.RotateRight()
@@ -24,11 +26,10 @@ func (p *TemplateTanks) Update(t *tank.Tank) {
 	t.Update()
 }
 
-func NewTank() *tank.Tank {
-	t := &tank.Tank{
-		Name:  "Template Tank",
-		Color: color.Black,
+func (tt *TemplateTanks) Create() *tank.Tank {
+	// Create a new tank
+	return &tank.Tank{
+		Name:  "TemplateTank",
+		Color: color.RGBA{0, 0xff, 0xff, 0xff},
 	}
-
-	return t
 }
