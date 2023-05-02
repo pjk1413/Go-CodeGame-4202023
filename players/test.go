@@ -1,18 +1,18 @@
 package players
 
 import (
+	"image/color"
+
 	"codegame.com/codegame/tank"
 )
 
 type Destroyer struct {
-	name string
-	tank tank.Tank
+	Name  string
+	Color color.Color
 }
 
-func (d *Destroyer) Update() {
-
-}
-
-func (d *Destroyer) Init() {
-
+func (p *Destroyer) Update(t *tank.Tank) {
+	// t.Decelerate()
+	// t.RotateLeft()
+	t.Update()
 }

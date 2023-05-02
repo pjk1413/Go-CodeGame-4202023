@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"math/rand"
-	"time"
 
+	"codegame.com/codegame/tank"
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -46,6 +45,18 @@ type Position struct {
 	y float64
 }
 
+func (w *World) toMap() [40][30]map[string]float64 {
+	var tm [40][30]map[string]float64
+
+	for ci, _ := range w.tilemap {
+		for ri, r := range w.tilemap[ci] {
+			tm[ci][ri] = map[string]float64{"x": r.x, "y": r.y, "size": float64(w.tileSize)}
+		}
+	}
+
+	return tm
+}
+
 func isStartingPosition(c int, r int) bool {
 	if 36 > c && 4 < c && r > 4 && r < 26 {
 		return true
@@ -70,39 +81,39 @@ func (w *World) init() {
 		log.Fatal(err)
 	}
 
-	rand.Seed(time.Now().UnixNano()) // deprecated
-	w.frequency = 1000
-	w.tileSize = 20
-	tilesImage = ebiten.NewImage(w.tileSize, w.tileSize)
+	// rand.Seed(time.Now().UnixNano()) // deprecated
+	// w.frequency = 1000
+	// w.tileSize = 20
+	// tilesImage = ebiten.NewImage(w.tileSize, w.tileSize)
 	w.bgColor = color.White
-	w.blockColor = color.Black
+	// w.blockColor = color.Black
 
 	// creates a tilemap
-	var tilemap [40][30]Block
-	for c := 0; c < 40; c++ {
-		for r := 0; r < 30; r++ {
-			block := Block{}
-			block.color = color.White
+	// var tilemap [40][30]Block
+	// for c := 0; c < 40; c++ {
+	// 	for r := 0; r < 30; r++ {
+	// 		block := Block{}
+	// 		block.color = color.White
 
-			// create a wall around the playing field
-			if c == 0 || r == 0 || c == len(tilemap)-1 || r == len(tilemap[0])-1 {
-				block.color = w.blockColor
-				block.wall = true
+	// 		// create a wall around the playing field
+	// 		if c == 0 || r == 0 || c == len(tilemap)-1 || r == len(tilemap[0])-1 {
+	// 			block.color = w.blockColor
+	// 			block.wall = true
 
-				// creates random obstacles
-			} else if rand.Intn(w.frequency) < 10 && isStartingPosition(c, r) {
-				block.color = w.blockColor
-				block.wall = true
-			}
+	// 			// creates random obstacles
+	// 		} else if rand.Intn(w.frequency) < 10 && isStartingPosition(c, r) {
+	// 			block.color = w.blockColor
+	// 			block.wall = true
+	// 		}
 
-			block.x = float64((c) * 20)
-			block.y = float64((r) * 20)
+	// 		block.x = float64((c) * 20)
+	// 		block.y = float64((r) * 20)
 
-			tilemap[c][r] = block
-		}
-	}
+	// 		tilemap[c][r] = block
+	// 	}
+	// }
 
-	w.tilemap = tilemap
+	// w.tilemap = tilemap
 }
 
 func (w *World) startingPositions() [][]int {
@@ -111,10 +122,11 @@ func (w *World) startingPositions() [][]int {
 	return [][]int{}
 }
 
-func (w *World) scoreboard(screen *ebiten.Image, pos int, player PlayerInterface) {
+func (w *World) scoreboard(screen *ebiten.Image, pos int, tank tank.Tank) {
+
 	// Draw player name
-	vector.DrawFilledRect(screen, 800, float32((600/4)*pos-(600/4-5)), 200, 32, player.GetColor(), false)
-	text.Draw(screen, player.GetName(), mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-30)), color.Black)
+	vector.DrawFilledRect(screen, 800, float32((600/4)*pos-(600/4-5)), 200, 32, tank.Color, false)
+	text.Draw(screen, tank.Name, mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-30)), color.Black)
 
 	// Draw lines to create scoreboard
 	if pos == 1 {
@@ -129,21 +141,23 @@ func (w *World) scoreboard(screen *ebiten.Image, pos int, player PlayerInterface
 	text.Draw(screen, fmt.Sprintf("Health: %d/3", pos), mplusNormalFont, 800+10, int((600/4)*pos-((600/4)-90)), color.Black)
 	vector.DrawFilledRect(screen, 800+10, float32((600/4)*pos-((600/4)-110)), 180, 30, color.RGBA{0, 0xff, 0, 0xff}, false)
 	vector.DrawFilledRect(screen, 800+10, float32((600/4)*pos-((600/4)-110)), 90, 30, color.RGBA{0xff, 0, 0, 0xff}, false)
+
+	// Draw scoreboard border
+	vector.DrawFilledRect(screen, 800, 0, 5, 600, color.Black, false)
 }
 
-func (w *World) drawScreen(screen *ebiten.Image, players []PlayerInterface) {
+func (w *World) drawScreen(screen *ebiten.Image, tanks []tank.Tank) {
 	screen.Fill(w.bgColor)
 
-	for ci, _ := range w.tilemap {
-		for _, r := range w.tilemap[ci] {
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(r.x, r.y)
-			vector.DrawFilledRect(screen, float32(r.x), float32(r.y), float32(w.tileSize), float32(w.tileSize), r.color, false)
-		}
-	}
+	// for ci, _ := range w.tilemap {
+	// 	for _, r := range w.tilemap[ci] {
+	// 		op := &ebiten.DrawImageOptions{}
+	// 		op.GeoM.Translate(r.x, r.y)
+	// 		vector.DrawFilledRect(screen, float32(r.x), float32(r.y), float32(w.tileSize), float32(w.tileSize), r.color, false)
+	// 	}
+	// }
 
-	for i, player := range players {
-		fmt.Println(player.GetName())
-		w.scoreboard(screen, i+1, player)
+	for i, tank := range tanks {
+		w.scoreboard(screen, i+1, tank)
 	}
 }
