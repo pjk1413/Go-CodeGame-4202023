@@ -140,7 +140,7 @@ func StartingPositions(total int) []Position {
 func (w *World) scoreboard(screen *ebiten.Image, pos int, tank tank.Tank) {
 
 	// Draw player name
-	vector.DrawFilledRect(screen, 800, float32((600/4)*pos-(600/4-5)), 200, 32, tank.GetColor(), false)
+	vector.DrawFilledRect(screen, 800, float32((600/4)*pos-(600/4-5)), 200, 32, tank.Color, false)
 
 	name := tank.Name
 

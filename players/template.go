@@ -1,7 +1,6 @@
 package players
 
 import (
-	"fmt"
 	"codegame.com/codegame/colors"
 	"codegame.com/codegame/tank"
 )
@@ -10,10 +9,9 @@ type SampleTank struct {}
 
 // Will need the tilemap and the player locations
 func (sampleTank *SampleTank) Update(t *tank.Tank, pos []tank.TankPosition) {
-	for _, position := range pos {
+	// for _, position := range pos {
 		// loop through the positions of all enemy tanks
-		fmt.Println(position)
-	}
+	// }
 
 	// All the actions that can be performed
 	t.GetPosition()

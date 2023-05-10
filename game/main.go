@@ -113,7 +113,7 @@ func main() {
 
 	// init tanks and players, for now all players will need to be hard coded into the game
 	g.players = []player.PlayerInterface{
-		&players.TemplateTanks{},
+		&players.SampleTank{},
 		&players.Destroyer{},
 		&players.Killer{},
 		&players.BigBoy{},
