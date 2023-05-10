@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"math/rand"
+	"time"
 
 	"codegame.com/codegame/tank"
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
@@ -18,6 +20,10 @@ var (
 	mplusNormalFont font.Face
 	strikeface      font.Face
 	tilesImage      *ebiten.Image
+)
+
+const (
+	obstacles bool = false
 )
 
 type World struct {
@@ -62,6 +68,9 @@ func isStartingPosition(c int, r int) bool {
 }
 
 func (w *World) init() {
+	// set background color
+	w.bgColor = color.White
+
 	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
 	if err != nil {
 		log.Fatal(err)
@@ -78,39 +87,42 @@ func (w *World) init() {
 		log.Fatal(err)
 	}
 
-	// rand.Seed(time.Now().UnixNano()) // deprecated
-	// w.frequency = 1000
-	// w.tileSize = 20
-	// tilesImage = ebiten.NewImage(w.tileSize, w.tileSize)
-	w.bgColor = color.White
-	// w.blockColor = color.Black
+	if obstacles {
+		rand.Seed(time.Now().UnixNano()) // deprecated
+		w.frequency = 1000
+		w.tileSize = 20
+		tilesImage = ebiten.NewImage(w.tileSize, w.tileSize)
 
-	// creates a tilemap
-	// var tilemap [40][30]Block
-	// for c := 0; c < 40; c++ {
-	// 	for r := 0; r < 30; r++ {
-	// 		block := Block{}
-	// 		block.color = color.White
+		w.blockColor = color.Black
 
-	// 		// create a wall around the playing field
-	// 		if c == 0 || r == 0 || c == len(tilemap)-1 || r == len(tilemap[0])-1 {
-	// 			block.color = w.blockColor
-	// 			block.wall = true
+		// creates a tilemap
+		var tilemap [40][30]Block
+		for c := 0; c < 40; c++ {
+			for r := 0; r < 30; r++ {
+				block := Block{}
+				block.color = color.White
 
-	// 			// creates random obstacles
-	// 		} else if rand.Intn(w.frequency) < 10 && isStartingPosition(c, r) {
-	// 			block.color = w.blockColor
-	// 			block.wall = true
-	// 		}
+				// create a wall around the playing field
+				if c == 0 || r == 0 || c == len(tilemap)-1 || r == len(tilemap[0])-1 {
+					block.color = w.blockColor
+					block.wall = true
 
-	// 		block.x = float64((c) * 20)
-	// 		block.y = float64((r) * 20)
+					// creates random obstacles
+				} else if rand.Intn(w.frequency) < 10 && isStartingPosition(c, r) {
+					block.color = w.blockColor
+					block.wall = true
+				}
 
-	// 		tilemap[c][r] = block
-	// 	}
-	// }
+				block.x = float64((c) * 20)
+				block.y = float64((r) * 20)
 
-	// w.tilemap = tilemap
+				tilemap[c][r] = block
+			}
+		}
+
+		w.tilemap = tilemap
+	}
+
 }
 
 func StartingPositions(total int) []Position {
@@ -159,13 +171,16 @@ func (w *World) scoreboard(screen *ebiten.Image, pos int, tank tank.Tank) {
 func (w *World) drawScreen(screen *ebiten.Image, tanks []tank.Tank) {
 	screen.Fill(w.bgColor)
 
-	// for ci, _ := range w.tilemap {
-	// 	for _, r := range w.tilemap[ci] {
-	// 		op := &ebiten.DrawImageOptions{}
-	// 		op.GeoM.Translate(r.x, r.y)
-	// 		vector.DrawFilledRect(screen, float32(r.x), float32(r.y), float32(w.tileSize), float32(w.tileSize), r.color, false)
-	// 	}
-	// }
+	// Draw obstacles to map
+	if obstacles {
+		for ci, _ := range w.tilemap {
+			for _, r := range w.tilemap[ci] {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Translate(r.x, r.y)
+				vector.DrawFilledRect(screen, float32(r.x), float32(r.y), float32(w.tileSize), float32(w.tileSize), r.color, false)
+			}
+		}
+	}
 
 	for i, tank := range tanks {
 		w.scoreboard(screen, i+1, tank)

@@ -1,21 +1,12 @@
 package main
 
 import (
-	"image/color"
 	"log"
 
 	"codegame.com/codegame/player"
 	"codegame.com/codegame/players"
 	"codegame.com/codegame/tank"
 	"github.com/hajimehoshi/ebiten/v2"
-)
-
-var (
-	red    = color.RGBA{0xff, 0, 0, 0xff}
-	blue   = color.RGBA{0, 0, 0xff, 0xff}
-	green  = color.RGBA{0, 0xff, 0, 0xff}
-	yellow = color.RGBA{0xff, 0xff, 0, 0xff}
-	orange = color.RGBA{0xff, 0xA5, 0, 0xff}
 )
 
 const (
@@ -26,11 +17,6 @@ const (
 	rows   int     = 6
 	cols   int     = 5
 )
-
-type P struct {
-	t tank.Tank
-	i player.PlayerInterface
-}
 
 type Game struct {
 	world   World // set world here
@@ -53,7 +39,7 @@ func (g *Game) Update() error {
 			hit, move = true, false
 		}
 
-		// check for bullet collisions and tank collisions
+		// check for collisions
 		for t := 0; t < len(g.tanks); t++ {
 			if t != i {
 				enemy := g.tanks[t].GetPosition()
@@ -76,13 +62,17 @@ func (g *Game) Update() error {
 		}
 
 		if move {
+			// create an array of enemy positions to pass into Update function
 			tp := []tank.TankPosition{}
+
 			// get all the enemy tanks positions
 			for t := 0; t < len(g.tanks); t++ {
 				if t != i {
 					tp = append(tp, g.tanks[t].GetPosition())
 				}
 			}
+
+			// pass positions to Update as well as tank
 			g.players[i].Update(&g.tanks[i], tp)
 		}
 
@@ -95,11 +85,12 @@ func (g *Game) Update() error {
 		}
 
 	}
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// Order matters
+	// Order matters here
 
 	// draw the world onto the screen
 	g.world.drawScreen(screen, g.tanks)
@@ -120,7 +111,7 @@ func main() {
 	g.world = World{}
 	g.world.init()
 
-	// init tanks and players
+	// init tanks and players, for now all players will need to be hard coded into the game
 	g.players = []player.PlayerInterface{
 		&players.TemplateTanks{},
 		&players.Destroyer{},
@@ -128,10 +119,12 @@ func main() {
 		&players.BigBoy{},
 	}
 
+	// Create all players
 	for _, player := range g.players {
 		g.tanks = append(g.tanks, *player.Create())
 	}
 
+	// Set starting position for all players/tanks
 	for i, position := range StartingPositions(4) {
 		g.tanks[i].InitTank(position.x, position.y, position.facing)
 	}

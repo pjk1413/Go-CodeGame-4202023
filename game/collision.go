@@ -5,6 +5,7 @@ import (
 )
 
 func OffMap(pos tank.TankPosition, worldX, worldY float64) bool {
+	// Determines if tank has gone off map
 
 	// x axis
 	if pos.X < 0 || pos.X+float64(pos.Width) > worldX {

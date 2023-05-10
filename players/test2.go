@@ -9,8 +9,8 @@ import (
 type Killer struct{}
 
 func (d *Killer) Update(t *tank.Tank, pos []tank.TankPosition) {
-	// t.Decelerate()
-	// t.RotateLeft()
+	t.Decelerate()
+	t.RotateLeft()
 	t.Update()
 }
 

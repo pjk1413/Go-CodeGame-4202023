@@ -9,7 +9,7 @@ import (
 type BigBoy struct{}
 
 func (d *BigBoy) Update(t *tank.Tank, pos []tank.TankPosition) {
-	// t.Accelerate()
+	t.Accelerate()
 	t.Update()
 }
 

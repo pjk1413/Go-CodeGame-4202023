@@ -2,7 +2,6 @@ package players
 
 import (
 	"image/color"
-	"math"
 
 	"codegame.com/codegame/tank"
 )
@@ -13,14 +12,14 @@ type Destroyer struct {
 }
 
 func (d *Destroyer) Update(t *tank.Tank, pos []tank.TankPosition) {
-	p := t.GetPosition()
+	// p := t.GetPosition()
 
-	degrees := p.Facing * (180 / math.Pi)
-	if degrees < -85 && degrees > -95 {
-		t.Accelerate()
-	} else {
-		t.RotateLeft()
-	}
+	// degrees := p.Facing * (180 / math.Pi)
+	// if degrees < -85 && degrees > -95 {
+	// 	t.Accelerate()
+	// } else {
+	// 	t.RotateLeft()
+	// }
 
 	t.Update()
 }

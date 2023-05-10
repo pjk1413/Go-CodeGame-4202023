@@ -1,35 +1,36 @@
 package players
 
 import (
-	"image/color"
-
+	"fmt"
+	"codegame.com/codegame/colors"
 	"codegame.com/codegame/tank"
 )
 
-type TemplateTanks struct {
-	Name  string
-	Color color.Color
-}
+type SampleTank struct {}
 
 // Will need the tilemap and the player locations
-func (tt *TemplateTanks) Update(t *tank.Tank, pos []tank.TankPosition) {
-	p := t.GetPosition()
-
-	// circle := 2 * math.Pi
-
-	if p.Facing > 89 && p.Facing < 91 {
-		t.Fire()
-	} else {
-		t.RotateRight()
+func (sampleTank *SampleTank) Update(t *tank.Tank, pos []tank.TankPosition) {
+	for _, position := range pos {
+		// loop through the positions of all enemy tanks
+		fmt.Println(position)
 	}
 
-	t.Update()
+	// All the actions that can be performed
+	t.GetPosition()
+	t.Accelerate()
+	t.Decelerate()
+	t.RotateLeft()
+	t.RotateRight()
+	t.Fire()
+	t.Stop()
+
+	t.Update() // This always needs to be called within the Update method
 }
 
-func (tt *TemplateTanks) Create() *tank.Tank {
+func (tt *SampleTank) Create() *tank.Tank {
 	// Create a new tank
 	return &tank.Tank{
-		Name:  "TemplateTank",
-		Color: color.RGBA{0, 0xff, 0xff, 0xff},
+		Name:  "SampleTank",
+		Color: colors.RED,
 	}
 }

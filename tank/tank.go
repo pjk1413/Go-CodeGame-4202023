@@ -8,14 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-var (
-	red    = color.RGBA{0xff, 0, 0, 0xff}
-	blue   = color.RGBA{0, 0, 0xff, 0xff}
-	green  = color.RGBA{0, 0xff, 0, 0xff}
-	yellow = color.RGBA{0xff, 0xff, 0, 0xff}
-	orange = color.RGBA{0xff, 0xA5, 0, 0xff}
-)
-
 type TankPosition struct {
 	Width      int
 	Height     int
@@ -109,9 +101,9 @@ func (t *Tank) GetHealth() int {
 	return t.health
 }
 
-func (t *Tank) GetColor() color.Color {
-	return t.Color
-}
+// func (t *Tank) GetColor() color.Color {
+// 	return t.Color
+// }
 
 // ACTIONS
 
@@ -164,6 +156,8 @@ func (t *Tank) RotateRight() {
 		t.facing += .05
 	}
 }
+
+// PRIVATE METHODS BELOW THIS LINE
 
 func (t *Tank) Update() {
 	if t.health != 0 {
@@ -258,10 +252,9 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 			}
 		}
 	}
-
 }
 
-// PRIVATE METHODS BELOW THIS LINE
+
 
 func (t *Tank) Hit() {
 	if !t.respawn {
